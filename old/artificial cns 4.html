@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+			canvas {
+				border: solid #000000;
+				background-color: #FFFFFF;
+			}
+		</style>
+			<p> Weights between -20 and 20:<p>
+			<?php $value = "<p> Value: <span id = "demo"> </spam></p>"?>
+			<form id = "form", onsubmit = "return true">
+			<input type = "number" name = "quantity" min = "-20" max = "20">
+			<input type = "submit">
+		</form>
+	</head>
+	<body onload = "draw()">
+		<script>
+			var num = document.getElementById("form").innerHTML;
+
+			var select = 'circle';
+
+			var circles = [];
+			var clicked = [];
+			var weights = [];
+			var weightsClicked = [];
+
+			var defaultWeight = 5;
+
+			const normColor = 'black';
+
+			const highColor = 'red';
+			
+
+			const R = 20;
+			const R1 = 15;
+
+			const canvas = document.createElement(id = "canvas");
+			const cWidth = 500;
+			const cHeight = 500;
+
+			const sideWidth = 50;
+			canvas.id = "canvas"
+			canvas.width = cWidth;
+			canvas.height = cHeight;
+
+			document.body.insertBefore(canvas, document.body.childNodes[0]);
+			const ctx = canvas.getContext("2d");
+
+			
+
+			function draw() {
+
+				ctx.clearRect(0, 0, cWidth, cHeight);
+
+				drawLine(sideWidth, 0, sideWidth, cHeight,);
+
+				var color = normColor;
+				if(select == 'circle') color = highColor;
+				drawCircle(sideWidth / 2, sideWidth / 2, R, color);
+				drawRectangle(0, 0, sideWidth, sideWidth, color);
+
+				color = normColor;
+				if(select == 'line') color = highColor;
+				drawLine(5, 95, 50, 55, color);
+				drawRectangle(0, sideWidth, sideWidth, sideWidth, color);
+
+				for (var i = 0; i < circles.length; i++) {
+					var color = normColor ;
+					if(circles[i].highlite) {
+						color = highColor;
+					}
+					var x1 = circles[i].x;
+					var y1 = circles[i].y;
+					drawCircle (x1, y1, R, color);
+					if(circles[i].connected) {
+						for (var j = 0; j < circles[i].connected.length; j++) {
+							console.log(x1, y1);
+							var x2 = circles[circles[i].connected[j]].x;
+							var y2 = circles[circles[i].connected[j]].y;
+							
+							drawLine(
+								x1, 
+								y1, 
+								x2,
+								y2,
+							)
+							var lineCenterX = (x1 + x2) / 2;
+							var lineCenterY = (y1 + y2) / 2;
+								weights = [];
+								weights.push( {
+								  x: lineCenterX,
+								  y: lineCenterY,
+								  highlite: 0,
+								  weight: 0
+								  })
+								console.log(weights);
+							for (var k = 0; k < weights.length; k++) {
+								var x3 = weights[k].x;
+								var y3 = weights[k].y;
+								if (x3 !== x1 ||x3 !== x2)
+								drawCircle (
+									x3,
+									y3,
+									R1,
+									color,
+									)
+
+								writeNum (
+									weights[k].weight,
+									x3,
+									y3,
+									)
+								console.log(weights);
+							}
+						}
+					}
+
+
+				}
+
+				
+				//drawCircle (circles[icc].x, circles[icc].y, highColor);
+
+			}
+			function included (n, min, max) {
+				if(n >= min && n < max ) return 1
+				else return 0;
+			}
+			
+			document.getElementById("canvas").addEventListener("mouseup", function (e) {
+				var clickX = e.clientX;
+				var clickY = e.clientY;		
+
+				console.log(clicked);
+
+				if(select == 'circle' && clicked.length > 0) {
+					var idx = clicked.pop();
+					circles[idx].x = clickX;
+					circles[idx].y = clickY;
+					clicked = [];
+					draw();
+				}
+
+			});
+
+			document.getElementById("canvas").addEventListener("mousedown", function (e) {
+				var clickX = e.clientX;
+				var clickY = e.clientY;
+
+
+				if(included(clickX, 0, 50) && included(clickY, 0, 50)) {
+					select = 'circle';
+					clicked = [];
+					resetHighlite ()
+					draw();
+					return;
+				}
+				
+				if(clickX < 51 && clickY > 50 && clickY < 101) {
+					select = 'line';
+					clicked = [];
+					resetHighlite ()
+					draw();
+					return;
+				}
+
+				if(clickX > 50 && clickX < 480 && clickY > 20 && clickY < 480) {
+					if (select == 'circle') {  
+						var icc = circleClicked (clickX, clickY,  2 * R + 10);
+
+						if(icc == -1) {
+							circles.push(
+								{x: clickX, y: clickY, highlite: 0, connected: []}
+							);
+
+							draw();
+						} else {
+							clicked = [icc];
+						console.log('Oda nem lehet mar kort rakni!');
+						} 
+
+						if(weightsClicked > 0) {
+							var weightCircle = weightClicked (clickX, clickY, R1);
+							if (weightCircle > -1); {
+								if (weightsClicked == 0); {
+									weights[weightCircle].highlite = 1;
+									weightsClicked.push(weightCircle);
+							    }
+								if (weightsClicked == 1) {
+									weightsClicked[0].highlite = 0;
+									weightsClicked.pop();
+									weights[weightCircle].highlite = 1;
+									weightsClicked.push(weightCircle);
+								}
+							}
+						}
+						draw();
+					} else {
+					
+						var icc = circleClicked(clickX, clickY, R);
+				
+						if(icc > -1) {
+							if(clicked.length == 0 ) {
+								circles[icc].highlite = 1;
+								clicked.push(icc);
+							} else if (clicked.length == 1) {
+								circles[icc].highlite = 1;
+								circles[icc].connected.push(clicked[0]);								
+
+								clicked.push(icc);
+							} else if (clicked.length == 2) {							
+								circles[clicked[0]].highlite = 0;
+								circles[clicked[1]].highlite = 0;
+								circles[icc].highlite = 1;
+								clicked = [icc];
+							}
+						}
+					draw();
+					}
+				}			
+			});
+
+
+			function drawLine (x1, y1, x2, y2, color) {
+				ctx.beginPath();
+				ctx.moveTo(x1, y1);
+				ctx.lineTo(x2, y2);
+				ctx.strokeStyle = color;
+				ctx.stroke();
+				ctx.strokeStyle = normColor;
+			}
+
+			function drawCircle (x, y, r, color) {
+				ctx.beginPath();
+				ctx.arc(x, y, r, 0, 2 * Math.PI);
+				ctx.strokeStyle = color;
+				ctx.stroke();
+				ctx.strokeStyle = normColor;
+			}
+
+			function drawRectangle (x1, y1, lenX, lenY, color) {
+				ctx.beginPath();
+				ctx.rect (x1, y1, lenX, lenY);
+				ctx.strokeStyle = color;
+				ctx.stroke();
+				ctx.strokeStyle = normColor;
+			}
+
+			function writeNum(num, x, y) {
+				ctx.font = "15px Arial";
+				ctx.fillText(num, x, y);
+			}
+
+			function circleClicked (x, y, distance) {
+				for (var i = 0; i < circles.length; i++) {
+					var cx = circles[i].x;
+					var cy = circles[i].y;
+					var minx = cx - distance;
+					var maxx = cx + distance;
+					var miny = cy - distance;
+					var maxy = cy + distance;
+					if(included(x, minx, maxx) && included(y, miny, maxy)) {
+						return i;
+					}
+				}
+				return -1;
+			}	
+
+			function weightClicked (x, y, distance) {
+				for (var i = 0; i < weights.length; i++) {
+					var wx = weights[i].x;
+					var wy = weights[i].y;
+					var minx = wx - distance;
+					var maxx = wx + distance;
+					var miny = wy - distance;
+					var maxy = wy + distance;
+					if(included(x, minx, maxx) && included(y, miny, maxy)) {
+						return i;
+					}
+				}
+				return -1;
+			}			
+
+			function resetHighlite () {
+				for (var i = 0; i < circles.length; i++) {
+					circles[i].highlite = 0; 
+				}
+			}
+
+
+
+		</script>
+
+		<?php 
+
+			?>
+	</body>
+</html>

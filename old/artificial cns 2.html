@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		canvas {
+			border: solid #000000;
+			background-color: #FFFFFF;
+		}
+		</style>
+	</head>
+	<body onload = "draw()">
+		<script>
+
+			var select = 'circle';
+
+			var circles = [];
+			var clicked = [];
+
+			const normColor = 'gray';
+
+			const highColor = 'red';
+			
+
+			const R = 20; // radius of all circle
+
+			const canvas = document.createElement(id = "canvas");
+			const cWidth = 500;
+			const cHeight = 500;
+
+			const sideWidth = 50;
+			canvas.id = "canvas"
+			canvas.width = cWidth;
+			canvas.height = cHeight;
+
+			document.body.insertBefore(canvas, document.body.childNodes[0]);
+			const ctx = canvas.getContext("2d");
+
+			function draw() {
+
+				ctx.clearRect(0, 0, cWidth, cHeight);
+
+				drawLine(sideWidth, 0, sideWidth, cHeight);
+
+				var color = normColor;
+				if(select == 'circle') color = highColor;
+				drawCircle(sideWidth / 2, sideWidth / 2, color);
+				drawRectangle(0, 0, sideWidth, sideWidth, color);
+
+				color = normColor;
+				if(select == 'line') color = highColor;
+				drawLine(5, 95, 50, 55, color);
+				drawRectangle(0, sideWidth, sideWidth, sideWidth, color);
+
+				for (var i = 0; i < circles.length; i++) {
+					var color = normColor ;
+					if(circles[i].highlite) {
+						color = highColor;
+					}
+					drawCircle (circles[i].x, circles[i].y, color);
+					if(circles[i].connected) {
+						for (var j = 0; j < circles[i].connected.length; j++) {
+							drawLine(
+								circles[i].x, 
+								circles[i].y, 
+								circles[circles[i].connected[j]].x,
+								circles[circles[i].connected[j]].y,
+							)
+						}
+					}
+
+				}
+				
+				//drawCircle (circles[icc].x, circles[icc].y, highColor);
+
+			}
+			function included (n, min, max) {
+				if(n >= min && n < max) return 1;
+				else return 0;
+			}
+			
+			document.getElementById("canvas").addEventListener("mouseup", function (e) {
+				var clickX = e.clientX;
+				var clickY = e.clientY;		
+
+				console.log(clicked);
+
+				if(select == 'circle' && clicked.length > 0) {
+					var idx = clicked.pop();
+					circles[idx].x = clickX;
+					circles[idx].y = clickY;
+					clicked = [];
+					draw();
+				}
+			});
+
+			document.getElementById("canvas").addEventListener("mousedown", function (e) {
+				var clickX = e.clientX;
+				var clickY = e.clientY;
+
+				if(included(clickX, 0, 50) && included(clickY, 0, 50)) {
+					select = 'circle';
+					clicked = [];
+					resetHighlite ()
+					draw();
+					return;
+				}
+				
+				if(clickX < 51 && clickY > 50 && clickY < 101) {
+					select = 'line';
+					clicked = [];
+					resetHighlite ()
+					draw();
+					return;
+				}
+
+				if(clickX > 50 && clickX < 480 && clickY > 20 && clickY < 480) {
+					if (select == 'circle') {  
+
+						var icc = circleClicked (clickX, clickY,  2 * R + 10);
+
+						if(icc == -1) {
+							//drawCircle(clickX, clickY);
+							circles.push(
+								{x: clickX, y: clickY, highlite: 0, connected: []}
+							);
+							draw();
+						} else {
+							//alert('dfsdfb');
+							clicked = [icc];
+							console.log('Oda nem lehet mar kort rakni!');
+						} 
+					} else {
+					
+						var icc = circleClicked(clickX, clickY, R);
+				
+						if(icc > -1) {
+							if(clicked.length == 0) {
+								circles[icc].highlite = 1;
+								clicked.push(icc);
+							} else if (clicked.length == 1) {
+								circles[icc].highlite = 1;
+								circles[icc].connected.push(clicked[0]);								
+
+								clicked.push(icc);
+							} else if (clicked.length == 2) {								
+								circles[clicked[0]].highlite = 0;
+								circles[clicked[1]].highlite = 0;
+								circles[icc].highlite = 1;
+								clicked = [icc];
+							}
+							draw();
+						}
+					}
+				}
+			});
+
+
+			function drawLine (x1, y1, x2, y2, color) {
+				ctx.beginPath();
+				ctx.moveTo(x1, y1);
+				ctx.lineTo(x2, y2);
+				ctx.strokeStyle = color;
+				ctx.stroke();
+				ctx.strokeStyle = normColor;
+			}
+
+			function drawCircle (x, y, color) {
+				ctx.beginPath();
+				ctx.arc(x, y, R, 0, 2 * Math.PI);
+				ctx.strokeStyle = color;
+				ctx.stroke();
+				ctx.strokeStyle = normColor;
+			}
+
+			function drawRectangle (x1, y1, lenX, lenY, color) {
+				ctx.beginPath();
+				ctx.rect (x1, y1, lenX, lenY);
+				ctx.strokeStyle = color;
+				ctx.stroke();
+				ctx.strokeStyle = normColor;
+			}
+
+			function circleClicked (x, y, distance) {
+				for (var i = 0; i < circles.length; i++) {
+					var cx = circles[i].x;
+					var cy = circles[i].y;
+					var minx = cx - distance;
+					var maxx = cx + distance;
+					var miny = cy - distance;
+					var maxy = cy + distance;
+					if(included(x, minx, maxx) && included(y, miny, maxy)) {
+						return i;
+					}
+				}
+				return -1;
+			}			
+
+			function resetHighlite () {
+				for (var i = 0; i < circles.length; i++) {
+					circles[i].highlite = 0; 
+				}
+			}
+
+		</script>
+	</body>
+</html>
