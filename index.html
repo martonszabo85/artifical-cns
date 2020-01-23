@@ -9,20 +9,12 @@
 				background-color: #FFFFFF;
 			}
 		</style>
-			<p> Weights between -20 and 20:<p>
-			<?php $value = "<p> Value: <span id = "demo"> </spam></p>"?>
-			<form id = "form", onsubmit = "return true">
-			<input type = "number" name = "quantity" min = "-20" max = "20">
-			<input type = "submit">
-		</form>
 	</head>
 	
 	<body onload="draw()">
 		
 		<script>
-			var num = document.getElementById("form").innerHTML;
-
-			var select = 'circle';
+			var select;
 
 			var circles = [];
 			var clicked = [];
@@ -108,11 +100,11 @@
 
 					drawCircle (x3, y3, R1, color);
 
-						// writeNum (
-						// 	weights[k].weight,
-						// 	x3,
-						// 	y3,
-						// );
+						writeNum (
+							weights[k].weight,
+							x3,
+							y3,
+						);
 				}
 			}
 
@@ -129,7 +121,7 @@
 					window.mUpClickY = e.clientY;		
 
 
-					if(select == 'circle' && clicked.length > 0) {
+					if(select == 'circle' && clicked.length > 0 && mUpClickX < 50 && mUpClickX < 480 && mUpClickY < 480) {
 						idx = clicked.pop();
 						circles[idx].x = mUpClickX;
 						circles[idx].y = mUpClickY;
@@ -138,15 +130,23 @@
 						draw();
 					}
 
+					if (select == "circle" && weightCircleClicked > -1 && mUpClickX > 50 && mUpClickX < 480 && mUpClickY < 480) {
+						for (var i = 0; i < weights.length; i++) {
+							weights[i].x = mUpClickX;
+							weights[i].y = mUpClickY
+							draw();
+							return;
+						}
+					}
 				}
 			);
 
 			document.getElementById("canvas").addEventListener (
 				"mousedown",
-				function (e) {
+				function (d) {
 				
-					window.mDownclickX = e.clientX;
-					window.mDownclickY = e.clientY;
+					window.mDownclickX = d.clientX;
+					window.mDownclickY = d.clientY;
 
 
 					if(included(mDownclickX, 0, 50) && included(mDownclickY, 0, 50)) {
@@ -165,7 +165,7 @@
 						return;
 					}
 
-					if(mDownclickX > 50 && mDownclickX < 480 && mDownclickY > 20 && mDownclickY < 480) {
+					if(mDownclickX > 65 && mDownclickX < 480 && mDownclickY < 480) {
 
 						if (select == 'circle') {  
 							
@@ -173,21 +173,24 @@
 							
 							weightCircleClicked = weightClicked (mDownclickX, mDownclickY, 2 * R1);
 
-							if(icc > -1) {
+							if(icc > -1){
 								clicked = [icc];
 								draw();
 								return;
 							}
 	
-							if (weightCircleClicked == -1) {
+							if (weightCircleClicked == -1 ) {
 								circles.push(
 									{x: mDownclickX, y: mDownclickY, highlite: 0, connected: []}
 								);	
+								
+								draw();
+								return;
+							} else {
+								draw();
+								return;
 							}
 
-							draw();
-							
-							return;
 						
 						} else {
 						
@@ -216,20 +219,16 @@
 									var lineCenterX = (x1 + x2) / 2;
 									var lineCenterY = (y1 + y2) / 2;
 
-									// var l = weights.length - 1;
-									// if (weights.length > 0 && weights[0].x == weights[l].x && weights[0].y == weights[l].y) {
-									// 	weights.splice(l);
-									// 	console.log(l);
-									// }
-
-									weights.push ({
-										x: lineCenterX,
-										y: lineCenterY,
-										highlite: 0,
-										weight: defaultWeight,
-										circle1: icc,
-										circle2: clicked[0]
-									});
+									if (lineCenterX !== x1 && lineCenterX !== x2 && lineCenterY !== y1 && lineCenterY !== y2) {
+										weights.push ({
+											x: lineCenterX,
+											y: lineCenterY,
+											highlite: 0,
+											weight: defaultWeight,
+											circle1: icc,
+											circle2: clicked[0]
+										});
+									}	
 
 								} else if (clicked.length == 2) {							
 									circles[clicked[0]].highlite = 0;
