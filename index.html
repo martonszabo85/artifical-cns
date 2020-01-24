@@ -131,12 +131,11 @@
 					}
 
 					if (select == "circle" && weightCircleClicked > -1 && mUpClickX > 50 && mUpClickX < 480 && mUpClickY < 480) {
-						for (var i = 0; i < weights.length; i++) {
-							weights[i].x = mUpClickX;
-							weights[i].y = mUpClickY
-							draw();
-							return;
-						}
+						var newCoords = moveWeight (mUpClickX, mUpClickY, weightCircleClicked);
+						weights[weightCircleClicked].x = newCoords.x;
+						weights[weightCircleClicked].y = newCoords.y;
+						draw();
+						return;
 					}
 				}
 			);
@@ -321,8 +320,6 @@
 					var centerX = (x1 + x2) / 2;
 					var centerY = (y1 + y2) / 2;
 
-					console.log(circles[idx].connected[m]);
-
 					z = -1;
 					for (var i = 0; i < weights.length; i++) {
 						if(
@@ -342,6 +339,45 @@
 				return;
 			}
 
+			function moveWeight(clx, cly, i) {
+				//console.log(clx, cly, i);
+				var maxX = clx + cly - 50;
+				var minY = 50;
+				var c1X = circles[weights[i].circle1].x;
+				var c1Y = circles[weights[i].circle1].y;
+				var c2X = circles[weights[i].circle2].x;
+				var c2Y = circles[weights[i].circle2].y;
+				//console.log(c1X, c1Y, c2X, c2Y);
+				var wX = weights[i].x;
+				var wY = weights[i].y;
+				//console.log(wX, wY);
+				var d =  Math.sqrt(Math.pow(c2X - c1X, 2) + Math.pow(c2Y - c1Y, 2));
+				//console.log(d);
+				var d2 = Math.sqrt(Math.pow(c1X - clx, 2) + Math.pow(c1Y - cly, 2)); 
+				var d3 = Math.sqrt(Math.pow(c2X - clx, 2) + Math.pow(c2Y - cly, 2)); 
+				//console.log(d2, d3);
+				var d4 = Math.min(d2, d3);
+				var d5 = Math.max(d2, d3);
+				//console.log(d5, d4, d);
+				var d6 = (d5 / d4) * d;
+				//console.log(d);
+				var cir = [c2X, c2Y];
+				if (d2 == d3) {
+					cir = [c1X, c1Y];
+				}
+				var newCoords = newCoordsOnLine(cir, d6, wX, wY);
+				//console.log(newCoords);
+				return newCoords;
+			}
+
+			function newCoordsOnLine(cir, d6, wX, wY) {
+				console.log(cir, d6, wX, wY);
+				var gradient = (cir[0] - wX) / (cir[1] - wY);
+				console.log(gradient);
+				wX = wX + d6;
+				wY = wY + d6 * gradient;
+				return {x: wX, y: wY};	
+			}
 		</script>
 
 	</body>
