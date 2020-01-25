@@ -45,9 +45,21 @@
 			document.body.insertBefore(canvas, document.body.childNodes[0]);
 			const ctx = canvas.getContext("2d");
 
+			function drawGrid(m) {
+				for (var k = 0; k < cWidth; k += m) {
+					drawLine (k + 50, 0, k + 50, cHeight, '#cdcdcd');
+				}				
+
+				for (var k = 0; k < cHeight; k += m) {
+					drawLine (50, k, cWidth, k, '#cdcdcd');
+				}
+			}
+
 			function draw() {
 
 				ctx.clearRect(0, 0, cWidth, cHeight);
+
+				drawGrid(20);
 
 				drawLine(sideWidth, 0, sideWidth, cHeight,);
 
@@ -117,8 +129,8 @@
 				"mouseup", 
 				function (e) {
 
-					window.mUpClickX = e.clientX;
-					window.mUpClickY = e.clientY;		
+					window.mUpClickX = e.clientX - 10;
+					window.mUpClickY = e.clientY - 10;		
 
 
 					if(select == 'circle' && clicked.length > 0 && mUpClickX < 50 && mUpClickX < 480 && mUpClickY < 480) {
@@ -144,8 +156,8 @@
 				"mousedown",
 				function (d) {
 				
-					window.mDownclickX = d.clientX;
-					window.mDownclickY = d.clientY;
+					window.mDownclickX = Math.round((d.clientX - 10) / 10) * 10;
+					window.mDownclickY = Math.round((d.clientY - 10) / 10) * 10;
 
 
 					if(included(mDownclickX, 0, 50) && included(mDownclickY, 0, 50)) {
@@ -243,7 +255,6 @@
 				}
 			);
 
-
 			function drawLine (x1, y1, x2, y2, color) {
 				ctx.beginPath();
 				ctx.moveTo(x1, y1);
@@ -340,44 +351,42 @@
 			}
 
 			function moveWeight(clx, cly, i) {
-				//console.log(clx, cly, i);
-				var maxX = clx + cly - 50;
-				var minY = 50;
+
 				var c1X = circles[weights[i].circle1].x;
 				var c1Y = circles[weights[i].circle1].y;
+
 				var c2X = circles[weights[i].circle2].x;
 				var c2Y = circles[weights[i].circle2].y;
 				//console.log(c1X, c1Y, c2X, c2Y);
 				var wX = weights[i].x;
 				var wY = weights[i].y;
-				//console.log(wX, wY);
-				var d =  Math.sqrt(Math.pow(c2X - c1X, 2) + Math.pow(c2Y - c1Y, 2));
-				//console.log(d);
+
 				var d2 = Math.sqrt(Math.pow(c1X - clx, 2) + Math.pow(c1Y - cly, 2)); 
 				var d3 = Math.sqrt(Math.pow(c2X - clx, 2) + Math.pow(c2Y - cly, 2)); 
-				//console.log(d2, d3);
-				var d4 = Math.min(d2, d3);
-				var d5 = Math.max(d2, d3);
-				//console.log(d5, d4, d);
-				var d6 = (d5 / d4) * d;
+
 				//console.log(d);
 				var cir = [c2X, c2Y];
+
 				if (d2 == d3) {
 					cir = [c1X, c1Y];
 				}
-				var newCoords = newCoordsOnLine(cir, d6, wX, wY);
-				//console.log(newCoords);
-				return newCoords;
+
+				console.log(c1X, c1Y, wX, wY, c2X, c2Y);
+
+				var m1 = (cir[0] - wX) / (cir[1] - wY);
+				var m2 = 1 / (-1 *  m1);
+
+				console.log(m1, m2);
+
+				var c1 =  wY - m1 * wX;
+				var c2 = cly - m2 * clx;
+
+				var x3 = (c2 - c1) / (m1 - m2);
+				var y3 = m1 * x3 + c1;
+
+				return {x: x3, y: y3};
 			}
 
-			function newCoordsOnLine(cir, d6, wX, wY) {
-				console.log(cir, d6, wX, wY);
-				var gradient = (cir[0] - wX) / (cir[1] - wY);
-				console.log(gradient);
-				wX = wX + d6;
-				wY = wY + d6 * gradient;
-				return {x: wX, y: wY};	
-			}
 		</script>
 
 	</body>
