@@ -112,11 +112,11 @@
 
 					drawCircle (x3, y3, R1, color);
 
-						writeNum (
-							weights[k].weight,
-							x3,
-							y3,
-						);
+					writeNum (
+						weights[k].weight,
+						x3,
+						y3,
+					);
 				}
 			}
 
@@ -236,8 +236,8 @@
 											y: lineCenterY,
 											highlite: 0,
 											weight: defaultWeight,
-											circle1: icc,
-											circle2: clicked[0]
+											circle1: y1 > y2 ? icc : clicked[0],
+											circle2: y1 <= y2 ? icc : clicked[0],
 										});
 									}	
 
@@ -352,38 +352,38 @@
 
 			function moveWeight(clx, cly, i) {
 
-				var c1X = circles[weights[i].circle1].x;
-				var c1Y = circles[weights[i].circle1].y;
+				var step = 5;
 
-				var c2X = circles[weights[i].circle2].x;
-				var c2Y = circles[weights[i].circle2].y;
-				//console.log(c1X, c1Y, c2X, c2Y);
-				var wX = weights[i].x;
-				var wY = weights[i].y;
+				var x1 = circles[weights[i].circle1].x;
+				var y1 = circles[weights[i].circle1].y;
+				var x2 = circles[weights[i].circle2].x;
+				var y2 = circles[weights[i].circle2].y;
 
-				var d2 = Math.sqrt(Math.pow(c1X - clx, 2) + Math.pow(c1Y - cly, 2)); 
-				var d3 = Math.sqrt(Math.pow(c2X - clx, 2) + Math.pow(c2Y - cly, 2)); 
+				//https://stackoverflow.com/questions/9614109/how-to-calculate-an-angle-from-points
+				var dx = x1 - x2;
+				var adx = Math.abs(x1 - x2);
+				var dy = y1 - y2;
+				var ady = Math.abs(y1 - y2);
 
-				//console.log(d);
-				var cir = [c2X, c2Y];
+				var wx = weights[i].x;
+				var wy = weights[i].y;
+				
+				var up = 1;
 
-				if (d2 == d3) {
-					cir = [c1X, c1Y];
+				if(dx == adx && dy == ady) {
+					if(cly < wy) up = -1;
+					var theta = Math.atan2(adx, ady);
+					var x3 = wx + step * up * theta;
+					var y3 = wy + step * up;
+					weights[i].weight -= up;
+				} else {
+					if(cly > wy) up = -1;
+					var theta = Math.atan2(dx, dy);
+					var x3 = wx + step * up;
+					var y3 = wy + step * up * theta;
+					weights[i].weight += up;
 				}
-
-				console.log(c1X, c1Y, wX, wY, c2X, c2Y);
-
-				var m1 = (cir[0] - wX) / (cir[1] - wY);
-				var m2 = 1 / (-1 *  m1);
-
-				console.log(m1, m2);
-
-				var c1 =  wY - m1 * wX;
-				var c2 = cly - m2 * clx;
-
-				var x3 = (c2 - c1) / (m1 - m2);
-				var y3 = m1 * x3 + c1;
-
+				
 				return {x: x3, y: y3};
 			}
 
